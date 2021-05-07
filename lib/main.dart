@@ -17,7 +17,6 @@ class MyApp extends StatelessWidget {
         // When navigating to the "/" route, build the FirstScreen widget.
         '/': (context) => LoadPage(title: 'Crypto to Crypto Converter'),
         // When navigating to the "/second" route, build the SecondScreen widget.
-        '/convert': (context) => ConvertPage(),
       },
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.system,
@@ -37,6 +36,12 @@ class LoadPage extends StatefulWidget {
 }
 
 class _LoadPageState extends State<LoadPage> {
+  final TextEditingController _textControllerLeft = new TextEditingController();
+  final TextEditingController _textControllerRight =
+      new TextEditingController();
+  var names = [];
+  var coins_l = [];
+  var ids = [];
   bool loaded = false;
   bool connected = false;
   var jsonResponse;
@@ -53,13 +58,20 @@ class _LoadPageState extends State<LoadPage> {
         response = await http.get(url);
         jsonResponse = convert.jsonDecode(response.body) as List<dynamic>;
         connected = true;
+        print('API Response: $jsonResponse');
       } catch (e) {
         print("Could not connect with API");
         connected = false;
       }
     }
     setState(() {
+      for (var symbol in jsonResponse) {
+        coins_l.add(symbol["symbol"]);
+        ids.add(symbol["id"]);
+        names.add(symbol["name"]);
+      }
       loaded = true;
+      _textControllerLeft.text = "22";
     });
   }
 
@@ -70,15 +82,26 @@ class _LoadPageState extends State<LoadPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Container(
-            height: 300,
-            color: Colors.amber,
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                      begin: Alignment.bottomLeft,
+                      end: Alignment.topRight,
+                      colors: [Colors.green, Colors.greenAccent]),
+                  color: Colors.amber,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(20),
+                    bottomRight: Radius.circular(20),
+                  )),
+              child: text_input(context),
+            ),
           ),
           Expanded(
             child: loaded
                 ?
                 //set conditional with boolean isloading
-                Text("loaded")
+                coin_selecection(context)
                 : //on true
                 SpinKitChasingDots(
                     color: Colors.white,
@@ -89,18 +112,76 @@ class _LoadPageState extends State<LoadPage> {
       ),
     );
   }
-}
 
-class ConvertPage extends StatefulWidget {
-  @override
-  _ConvertPageState createState() => _ConvertPageState();
-}
-
-class _ConvertPageState extends State<ConvertPage> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(),
+  Widget text_input(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Row(children: [
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.all(25.0),
+              child: TextFormField(
+                controller: _textControllerLeft,
+                decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(20))),
+                    labelText: 'Bitcoin'),
+                keyboardType: TextInputType.number,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.all(25.0),
+              child: TextFormField(
+                decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(20))),
+                    labelText: 'Ethereum'),
+                keyboardType: TextInputType.number,
+              ),
+            ),
+          )
+        ]),
+        Row(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.all(25.0),
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    print("First Coin Selection");
+                  },
+                  icon: Icon(Icons.arrow_drop_down),
+                  label: Text("First Coin"),
+                ),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.all(25.0),
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    print("Second Coin Selection");
+                  },
+                  icon: Icon(Icons.arrow_drop_down),
+                  label: Text("Second Coin"),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
+  }
+
+  Widget coin_selecection(BuildContext context) {
+    return ListView.builder(
+        itemCount: coins_l.length,
+        itemBuilder: (BuildContext ctxt, int Index) {
+          return Text('$coins_l[Index] $names[Index]');
+        });
   }
 }
