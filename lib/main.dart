@@ -39,6 +39,7 @@ class _LoadPageState extends State<LoadPage> {
   final TextEditingController _textControllerLeft = new TextEditingController();
   final TextEditingController _textControllerRight =
       new TextEditingController();
+  var first_coin = [];
   var names = [];
   var coins_l = [];
   var ids = [];
@@ -71,7 +72,6 @@ class _LoadPageState extends State<LoadPage> {
         names.add(symbol["name"]);
       }
       loaded = true;
-      _textControllerLeft.text = "22";
     });
   }
 
@@ -136,6 +136,7 @@ class _LoadPageState extends State<LoadPage> {
             child: Padding(
               padding: EdgeInsets.all(25.0),
               child: TextFormField(
+                controller: _textControllerRight,
                 decoration: InputDecoration(
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(20))),
@@ -181,7 +182,15 @@ class _LoadPageState extends State<LoadPage> {
     return ListView.builder(
         itemCount: coins_l.length,
         itemBuilder: (BuildContext ctxt, int Index) {
-          return Text('$coins_l[Index] $names[Index]');
+          return RadioListTile(
+            title: Text(coins_l[Index] + ' | ' + names[Index]),
+            value: Index,
+            groupValue: first_coin,
+            onChanged: (value){
+              print(value);
+            }
+          );
+          //return Text(coins_l[Index] + names[Index]);
         });
   }
 }
